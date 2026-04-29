@@ -1,0 +1,20 @@
+[project]
+name = "jobpilot"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "bcrypt==4.1.2",
+    "email-validator>=2.3.0",
+    "fastapi>=0.136.1",
+    "passlib[bcrypt]==1.7.4",
+    "psycopg2-binary>=2.9.12",
+    "pwdlib[argon2]>=0.3.0",
+    "pydantic[email]>=2.13.3",
+    "pyjwt>=2.12.1",
+    "python-dotenv>=1.2.2",
+    "sqlalchemy>=2.0.49",
+    "sqlmodel>=0.0.38",
+    "uvicorn>=0.46.0",
+]
