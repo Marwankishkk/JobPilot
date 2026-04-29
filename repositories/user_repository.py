@@ -12,3 +12,11 @@ class UserRepository:
         db.commit()
         db.refresh(user)
         return user
+    
+    def activate_account(self, db: Session, email: str):
+        user = self.get_by_email(db, email)
+        if user:
+            user.is_active = True
+            db.commit()
+            return user
+        return None
