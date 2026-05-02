@@ -53,18 +53,18 @@ def login(user: UserLogin, response: Response, db: Session = Depends(get_db)):
             key="access_token",
             value=tokens["access_token"],
             httponly=True,
-            secure=False,  # True in production (HTTPS)
-            samesite="lax",
+            secure=True,        
+            samesite="none",   
             max_age=60 * 30,
             path="/",
         )
-        # Refresh token cookie
+
         response.set_cookie(
             key="refresh_token",
             value=tokens["refresh_token"],
             httponly=True,
-            secure=False,
-            samesite="lax",
+            secure=True,        
+            samesite="none",   
             max_age=60 * 60 * 24 * 7,
             path="/",
         )
@@ -135,8 +135,8 @@ def refresh_token(request: Request, response: Response):
             key="access_token",
             value=tokens["access_token"],
             httponly=True,
-            secure=False,
-            samesite="lax",
+            secure=True,
+            samesite="none",
             max_age=60 * 30,
             path="/",
         )
