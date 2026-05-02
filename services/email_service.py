@@ -26,11 +26,13 @@ def send_verification_email(email: str, token: str):
         "If you did not create this account, you can ignore this email."
     )
 
-    with smtplib.SMTP(smtp_host, smtp_port, timeout=80) as server:
-        server.starttls()
-        server.login(smtp_user, smtp_password)
-        server.send_message(message)
-    
+    try:
+        with smtplib.SMTP(smtp_host, smtp_port, timeout=80) as server:
+            server.starttls()
+            server.login(smtp_user, smtp_password)
+            server.send_message(message)
+    except Exception as e:
+        print("SMTP ERROR:", e)
 
 def send_reset_password_mail(email: str, token: str):
     reset_base = os.getenv("FRONTEND_URL", "http://localhost:3001/reset-password")
@@ -50,7 +52,10 @@ def send_reset_password_mail(email: str, token: str):
         f"{reset_link}\n\n"
         "If you did not request this, you can ignore this email."
     )
-    with smtplib.SMTP(smtp_host, smtp_port, timeout=80) as server:
-        server.starttls()
-        server.login(smtp_user, smtp_password)
-        server.send_message(message)
+    try:
+        with smtplib.SMTP(smtp_host, smtp_port, timeout=80) as server:
+            server.starttls()
+            server.login(smtp_user, smtp_password)
+            server.send_message(message)
+    except Exception as e:
+        print("SMTP ERROR:", e)
