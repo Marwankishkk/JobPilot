@@ -10,7 +10,6 @@ smtp_from = os.getenv("SMTP_FROM", smtp_user or "no-reply@jobpilot.local")
 def send_verification_email(email: str, token: str):
     frontend_verify_url = os.getenv("FRONTEND_URL", "http://localhost:3001/verify")
     frontend_verify_url = f"{frontend_verify_url}/verify" if not frontend_verify_url.endswith("/verify") else frontend_verify_url
-    print(f"Using frontend verification URL: {frontend_verify_url}")
     verify_link = f"{frontend_verify_url}?token={token}"
     # Dev fallback: keep local flow working without SMTP credentials.
     if not smtp_host or not smtp_user or not smtp_password:
@@ -27,10 +26,11 @@ def send_verification_email(email: str, token: str):
         "If you did not create this account, you can ignore this email."
     )
 
-    with smtplib.SMTP(smtp_host, smtp_port, timeout=15) as server:
+    with smtplib.SMTP(smtp_host, smtp_port, timeout=80) as server:
         server.starttls()
         server.login(smtp_user, smtp_password)
         server.send_message(message)
+    
 
 def send_reset_password_mail(email: str, token: str):
     reset_base = os.getenv("FRONTEND_URL", "http://localhost:3001/reset-password")
@@ -50,7 +50,7 @@ def send_reset_password_mail(email: str, token: str):
         f"{reset_link}\n\n"
         "If you did not request this, you can ignore this email."
     )
-    with smtplib.SMTP(smtp_host, smtp_port, timeout=15) as server:
+    with smtplib.SMTP(smtp_host, smtp_port, timeout=80) as server:
         server.starttls()
         server.login(smtp_user, smtp_password)
         server.send_message(message)
