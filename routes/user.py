@@ -6,6 +6,8 @@ from schemas.user import (
     UserResponse,
     UserLogin,
     TokenResponse,
+    ForgotPasswordRequest,
+    ResetPasswordRequest,
 )
 from services.user_service import UserService
 from core.db import get_db
@@ -73,19 +75,43 @@ def login(user: UserLogin, response: Response, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail=str(e))
 
 
+def get_current_user_email(request: Request):
+    token = request.cookies.get("access_token")
+    print("Access token from cookie:", token)  # Debugging line
+    if not token:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+
+    try:
+        return service.get_current_user(token)
+    except ValueError as e:
+        raise HTTPException(status_code=401, detail=str(e))
+
+
+# ----------------------------
+# FORGOT PASSWORD
+# ----------------------------
+@router.post("/forgot-password")
+def forgot_password(body: ForgotPasswordRequest, db: Session = Depends(get_db)):
+    try:
+        return service.forget_password(body.email, db)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+# ----------------------------
+# RESET PASSWORD
+# ----------------------------
+@router.post("/reset-password")
+def reset_password(body: ResetPasswordRequest, db: Session = Depends(get_db)):
+    try:
+        return service.reset_password(body.token, db, body.new_password)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
 # ----------------------------
 # GET CURRENT USER (/me)
 # ----------------------------
-def get_current_user_email(request: Request):
-        token = request.cookies.get("access_token")
-
-        if not token:
-            raise HTTPException(status_code=401, detail="Not authenticated")
-
-        try:
-            return service.get_current_user(token)
-        except ValueError as e:
-            raise HTTPException(status_code=401, detail=str(e))
 @router.get("/me")
 def get_current_user(email: str = Depends(get_current_user_email)):
     return {"email": email}
@@ -94,7 +120,7 @@ def get_current_user(email: str = Depends(get_current_user_email)):
 # ----------------------------
 # REFRESH TOKEN
 # ----------------------------
-@router.post("/refresh", response_model=TokenResponse)
+@router.post("/refresh")
 def refresh_token(request: Request, response: Response):
     try:
         refresh_token = request.cookies.get("refresh_token")

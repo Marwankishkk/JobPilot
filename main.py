@@ -6,7 +6,7 @@ from routes.user import router as user_router
 
 Base.metadata.create_all(bind=engine)
 origins = [
-    "http://localhost:3000",
+    "http://localhost:3001",
     "http://127.0.0.1:3000",
     "http://localhost:3001",
     "http://127.0.0.1:3001",

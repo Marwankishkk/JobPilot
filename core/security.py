@@ -25,7 +25,7 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
 
     to_encode = data.copy()
     now = datetime.now(timezone.utc)
-    expire = now + (expires_delta or timedelta(minutes=15))
+    expire = now + (expires_delta or timedelta(seconds=30))
     to_encode.update({
         "exp": expire,
         "iat": now,
@@ -111,3 +111,41 @@ def decode_email_token(token: str):
 
     except jwt.InvalidTokenError:
         raise ValueError("Invalid verification token")
+
+
+def create_password_reset_token(email: str):
+    secret_key = os.getenv("SECRET_KEY")
+    algorithm = os.getenv("ALGORITHM", "HS256")
+
+    if not secret_key:
+        raise ValueError("SECRET_KEY is missing")
+
+    now = datetime.now(timezone.utc)
+    expire = now + timedelta(hours=1)
+    payload = {
+        "sub": email,
+        "type": "password_reset",
+        "iat": now,
+        "exp": expire,
+    }
+    return jwt.encode(payload, secret_key, algorithm=algorithm)
+
+
+def decode_password_reset_token(token: str):
+    secret_key = os.getenv("SECRET_KEY")
+    algorithm = os.getenv("ALGORITHM", "HS256")
+
+    if not secret_key:
+        raise ValueError("SECRET_KEY is missing")
+
+    try:
+        payload = jwt.decode(token, secret_key, algorithms=[algorithm])
+        if payload.get("type") != "password_reset":
+            raise ValueError("Invalid password reset token")
+        if not isinstance(payload.get("sub"), str):
+            raise ValueError("Invalid subject in token")
+        return payload
+    except jwt.ExpiredSignatureError:
+        raise ValueError("Password reset link expired")
+    except jwt.InvalidTokenError:
+        raise ValueError("Invalid password reset token")

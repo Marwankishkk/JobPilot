@@ -20,3 +20,9 @@ class UserRepository:
             db.commit()
             return user
         return None
+    
+    def update_password(self, db: Session, user: User, hashed_password: str):
+        user.hashed_password = hashed_password
+        db.commit()
+        db.refresh(user)
+        return user

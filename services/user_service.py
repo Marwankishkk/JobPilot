@@ -3,7 +3,7 @@ from datetime import timedelta
 from fastapi import Request, HTTPException
 from schemas.user import UserCreate, UserLogin
 from models.user import User
-from .email_service import send_verification_email
+from .email_service import send_verification_email, send_reset_password_mail
 from core.security import (
     hash_password,
     verify_password,
@@ -13,6 +13,8 @@ from core.security import (
     decode_refresh_token,
     create_email_token,
     decode_email_token,
+    create_password_reset_token,
+    decode_password_reset_token,
 )
 from repositories.user_repository import UserRepository
 
@@ -89,10 +91,10 @@ class UserService:
     def login(self, db: Session, user_data: UserLogin):
 
         user = self.repo.get_by_email(db, user_data.email)
-        if not user.is_active:
-            raise ValueError("Account not activated. Please check your email.")
         if not user or not verify_password(user_data.password, user.hashed_password):
             raise ValueError("Invalid email or password")
+        if not user.is_active:
+            raise ValueError("Account not activated. Please check your email.")
 
         access_token = create_access_token(
             data={"sub": user.email},
@@ -107,6 +109,36 @@ class UserService:
             "access_token": access_token,
             "refresh_token": refresh_token,
         }
+
+    # ----------------------------
+    # Forget Password
+    # ----------------------------
+
+    def forget_password(self, email: str, db: Session):
+        user = self.repo.get_by_email(db, email)
+        if not user:
+            return {"message": "If an account exists for this email, you will receive reset instructions."}
+
+        token = create_password_reset_token(email=user.email)
+        send_reset_password_mail(user.email, token)
+
+        return {"message": "If an account exists for this email, you will receive reset instructions."}
+
+    def reset_password(self, token: str, db: Session, new_password: str):
+        try:
+            payload = decode_password_reset_token(token)
+        except ValueError as e:
+            raise ValueError(str(e))
+
+        email = payload.get("sub")
+        user = self.repo.get_by_email(db, email)
+        if not user:
+            raise ValueError("User not found")
+
+        self.repo.update_password(db, user, hash_password(new_password))
+        return {"message": "Password updated"}
+
+
 
     # ----------------------------
     # REFRESH TOKEN
