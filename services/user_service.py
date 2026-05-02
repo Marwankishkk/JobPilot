@@ -61,8 +61,11 @@ class UserService:
         token = create_email_token(email=user.email)
         try:
             send_verification_email(user.email,token)
-        except:
-            return {"message": "User registered but failed to send verification email. Please try again later."}
+        except Exception:
+            raise HTTPException(
+                status_code=500,
+                detail="User registered but failed to send verification email. Please try again later."
+            )
         return {"message": "User registered successfully. Please check your email to verify your account."}
     # ----------------------------
     # ACTIVATE ACCOUNT
