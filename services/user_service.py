@@ -59,8 +59,10 @@ class UserService:
         if not user:
             raise ValueError("Failed to create user")
         token = create_email_token(email=user.email)
-        
-        send_verification_email(user.email,token)
+        try:
+            send_verification_email(user.email,token)
+        except:
+            return {"message": "User registered but failed to send verification email. Please try again later."}
         return {"message": "User registered successfully. Please check your email to verify your account."}
     # ----------------------------
     # ACTIVATE ACCOUNT
@@ -120,7 +122,10 @@ class UserService:
             return {"message": "If an account exists for this email, you will receive reset instructions."}
 
         token = create_password_reset_token(email=user.email)
-        send_reset_password_mail(user.email, token)
+        try:
+            send_reset_password_mail(user.email, token)
+        except:
+            raise ValueError("Failed to send reset password email. Please try again later.")
 
         return {"message": "If an account exists for this email, you will receive reset instructions."}
 
