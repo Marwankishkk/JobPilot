@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from core.db import Base, engine
 from routes.user import router as user_router
-
+from routes.job import router as job_router
 Base.metadata.create_all(bind=engine)
 origins = [
     "http://localhost:3001",
@@ -17,6 +17,7 @@ origins = [
 app = FastAPI()
 
 app.include_router(user_router)
+app.include_router(job_router)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
