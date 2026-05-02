@@ -10,6 +10,7 @@ smtp_from = os.getenv("SMTP_FROM", smtp_user or "no-reply@jobpilot.local")
 def send_verification_email(email: str, token: str):
     frontend_verify_url = os.getenv("FRONTEND_URL", "http://localhost:3001/verify")
     frontend_verify_url = f"{frontend_verify_url}/verify" if not frontend_verify_url.endswith("/verify") else frontend_verify_url
+    print(f"Using frontend verification URL: {frontend_verify_url}")
     verify_link = f"{frontend_verify_url}?token={token}"
     # Dev fallback: keep local flow working without SMTP credentials.
     if not smtp_host or not smtp_user or not smtp_password:
