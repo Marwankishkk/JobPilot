@@ -20,6 +20,7 @@ def create_job(
     request: Request,
     db: Session = Depends(get_db)
 ):
+    print(type(job_data))  # Debugging line to check the type of job_data
     token = request.cookies.get("access_token")
     if not token:
         raise HTTPException(status_code=401, detail="Not authenticated")
@@ -28,11 +29,13 @@ def create_job(
         email = user_service.get_current_user(token)
         user = user_service.repo.get_by_email(db, email)
     except ValueError as e:
+        print("Error getting current user:", str(e))  # Debugging line
         raise HTTPException(status_code=401, detail=str(e))
 
     try:
         return service.create_job(db, job_data, user.id)
     except ValueError as e:
+        print("Error creating job:", str(e))  # Debugging line
         raise HTTPException(status_code=400, detail=str(e))
     
 @router.get("/")
