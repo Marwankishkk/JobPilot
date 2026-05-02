@@ -12,7 +12,7 @@ origins = [
     "http://127.0.0.1:3001",
     "https://localhost:3001",
     "https://localhost:3000",
-    "https://job-pilot-front-end-dvr1.vercel.app/",
+    "https://job-pilot-front-end-dvr1.vercel.app",
 ]
 
 app = FastAPI()
