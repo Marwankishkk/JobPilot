@@ -81,11 +81,12 @@ def send_email(to: str, subject: str, html: str, text: str | None = None):
         return None
 
     payload = {
-        "to": to,
-        "subject": subject,
-        "html": html,
-        "from": FROM_EMAIL,   # ✅ IMPORTANT FIX (your previous issue)
-    }
+    "to": to,
+    "subject": subject,
+    "html": html,
+    "from": FROM_EMAIL,
+    "smtpId": os.getenv("SMTP_ID")  
+}
 
     if text:
         payload["text"] = text
