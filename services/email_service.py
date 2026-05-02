@@ -76,10 +76,15 @@ def send_email(to: str, subject: str, html: str, text: str | None = None):
     Generic email sender using Promailer API
     """
 
+    if not API_KEY:
+        print("EMAIL ERROR: Missing API_MAIL_KEY")
+        return None
+
     payload = {
         "to": to,
         "subject": subject,
         "html": html,
+        "from": FROM_EMAIL,   # ✅ IMPORTANT FIX (your previous issue)
     }
 
     if text:
@@ -95,7 +100,7 @@ def send_email(to: str, subject: str, html: str, text: str | None = None):
             API_URL,
             json=payload,
             headers=headers,
-            timeout=10
+            timeout=25
         )
 
         data = response.json()
@@ -121,21 +126,16 @@ def send_verification_email(email: str, token: str):
     html = f"""
     <div>
         <h2>Welcome to JobPilot 🚀</h2>
-        <p>Please verify your account by clicking the link below:</p>
-        <a href="{verify_link}" target="_blank">
-            Verify Account
-        </a>
-        <p>If you did not create this account, ignore this email.</p>
+        <p>Please verify your account:</p>
+        <a href="{verify_link}" target="_blank">Verify Account</a>
     </div>
     """
-
-    text = f"Verify your account: {verify_link}"
 
     return send_email(
         to=email,
         subject="Verify your JobPilot account",
         html=html,
-        text=text
+        text=f"Verify your account: {verify_link}"
     )
 
 
@@ -148,19 +148,14 @@ def send_reset_password_mail(email: str, token: str):
     html = f"""
     <div>
         <h2>Password Reset Request</h2>
-        <p>Click the link below to reset your password:</p>
-        <a href="{reset_link}" target="_blank">
-            Reset Password
-        </a>
-        <p>This link expires in 1 hour.</p>
+        <p>Reset your password using the link below:</p>
+        <a href="{reset_link}" target="_blank">Reset Password</a>
     </div>
     """
-
-    text = f"Reset your password: {reset_link}"
 
     return send_email(
         to=email,
         subject="Reset your JobPilot password",
         html=html,
-        text=text
+        text=f"Reset password: {reset_link}"
     )
