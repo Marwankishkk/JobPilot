@@ -2,19 +2,19 @@ from pydantic import BaseModel, EmailStr , Field
 
 
 class UserCreate(BaseModel):
-    email: EmailStr
+    username: str
     password: str = Field(..., min_length=8 , max_length=128)
 
 
 class UserResponse(BaseModel):
     id: int
-    email: EmailStr
+    username: str
 
     class Config:
         from_attributes = True
 
 class UserLogin(BaseModel):
-    email: EmailStr
+    username: str
     password: str
 
 class TokenResponse(BaseModel): 
@@ -28,7 +28,7 @@ class RefreshTokenRequest(BaseModel):
 
 
 class ForgotPasswordRequest(BaseModel):
-    email: EmailStr
+    username: str
 
 
 class ResetPasswordRequest(BaseModel):

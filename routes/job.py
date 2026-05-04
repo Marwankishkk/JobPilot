@@ -25,8 +25,8 @@ def create_job(
         raise HTTPException(status_code=401, detail="Not authenticated")
 
     try:
-        email = user_service.get_current_user(token)
-        user = user_service.repo.get_by_email(db, email)
+        username = user_service.get_current_user(token)
+        user = user_service.repo.get_by_username(db, username)
     except ValueError as e:
         raise HTTPException(status_code=401, detail=str(e))
 
@@ -46,8 +46,8 @@ def get_jobs(
         raise HTTPException(status_code=401, detail="Not authenticated")
 
     try:
-        email = user_service.get_current_user(token)
-        user = user_service.repo.get_by_email(db, email)
+        username = user_service.get_current_user(token)
+        user = user_service.repo.get_by_username(db, username)
     except ValueError as e:
         raise HTTPException(status_code=401, detail=str(e))
 
@@ -65,8 +65,8 @@ def update_job(
         raise HTTPException(status_code=401, detail="Not authenticated")
 
     try:
-        email = user_service.get_current_user(token)
-        user = user_service.repo.get_by_email(db, email)
+        username = user_service.get_current_user(token)
+        user = user_service.repo.get_by_username(db, username)
     except ValueError as e:
         raise HTTPException(status_code=401, detail=str(e))
 
@@ -86,8 +86,8 @@ def delete_job(
         raise HTTPException(status_code=401, detail="Not authenticated")
 
     try:
-        email = user_service.get_current_user(token)
-        user = user_service.repo.get_by_email(db, email)
+        username = user_service.get_current_user(token)
+        user = user_service.repo.get_by_username(db, username)
     except ValueError as e:
         raise HTTPException(status_code=401, detail=str(e))
 

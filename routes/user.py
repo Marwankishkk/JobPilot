@@ -29,16 +29,16 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
 #-----------------------------
 #VERIFY User
 #-----------------------------
-@router.get("/verify")
-def verify_account(token: str, db: Session = Depends(get_db)):
-    try:
-        user = service.verify_account(token, db)
-        if user:
-            return {"message": "Account verified successfully"}
-        else:
-            raise HTTPException(status_code=400, detail="Invalid or expired token")
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+# @router.get("/verify")
+# def verify_account(token: str, db: Session = Depends(get_db)):
+#     try:
+#         user = service.verify_account(token, db)
+#         if user:
+#             return {"message": "Account verified successfully"}
+#         else:
+#             raise HTTPException(status_code=400, detail="Invalid or expired token")
+#     except ValueError as e:
+#         raise HTTPException(status_code=400, detail=str(e))
 
 # ----------------------------
 # LOGIN (set cookies)
@@ -75,7 +75,7 @@ def login(user: UserLogin, response: Response, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail=str(e))
 
 
-def get_current_user_email(request: Request):
+def get_current_username(request: Request):
     token = request.cookies.get("access_token")
     print("Access token from cookie:", token)  # Debugging line
     if not token:
@@ -93,7 +93,7 @@ def get_current_user_email(request: Request):
 @router.post("/forgot-password")
 def forgot_password(body: ForgotPasswordRequest, db: Session = Depends(get_db)):
     try:
-        return service.forget_password(body.email, db)
+        return service.forget_password(body.username, db)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -113,8 +113,8 @@ def reset_password(body: ResetPasswordRequest, db: Session = Depends(get_db)):
 # GET CURRENT USER (/me)
 # ----------------------------
 @router.get("/me")
-def get_current_user(email: str = Depends(get_current_user_email)):
-    return {"email": email}
+def get_current_user(username: str = Depends(get_current_username)):
+    return {"username": username}
 
 
 # ----------------------------
