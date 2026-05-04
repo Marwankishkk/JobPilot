@@ -11,8 +11,7 @@ from core.security import (
     decode_access_token,
     create_refresh_token,
     decode_refresh_token,
-    create_email_token,
-    decode_email_token,
+  
     create_password_reset_token,
     decode_password_reset_token,
 )
@@ -35,11 +34,11 @@ class UserService:
         if payload.get("type") != "access":
             raise ValueError("Invalid token type")
 
-        email = payload.get("sub")
-        if not email:
+        username = payload.get("sub")
+        if not username:
             raise ValueError("Invalid token payload")
 
-        return email
+        return username
    
 
 
@@ -47,67 +46,67 @@ class UserService:
     # REGISTER
     # ----------------------------
     def register_user(self, db: Session, user_data: UserCreate):
-        existing = self.repo.get_by_email(db, user_data.email)
+        existing = self.repo.get_by_username(db, user_data.username)
         if existing:
-            raise HTTPException(status_code=400, detail="Email already registered")
+            raise HTTPException(status_code=400, detail="username already registered")
             
         new_user = User(
-            email=user_data.email,
+            username=user_data.username,
             hashed_password=hash_password(user_data.password),
         )
         user=self.repo.create(db, new_user)
         if not user:
             raise ValueError("Failed to create user")
-        token = create_email_token(email=user.email)
-        try:
-            send_verification_email(user.email,token)
-        except Exception:
-            raise HTTPException(
-                status_code=500,
-                detail="User registered but failed to send verification email. Please try again later."
-            )
+        # token = create_email_token(email=user.email)
+        # try:
+        #     send_verification_email(user.email,token)
+        # except Exception:
+        #     raise HTTPException(
+        #         status_code=500,
+        #         detail="User registered but failed to send verification email. Please try again later."
+        #     )
         return {"message": "User registered successfully. Please check your email to verify your account."}
     # ----------------------------
     # ACTIVATE ACCOUNT
     # ----------------------------
-    def verify_account(self,token: str, db: Session ):
-        try:
+    # def verify_account(self,token: str, db: Session ):
+    #     try:
 
-            payload = decode_email_token(token)
-            print("Decoded token payload:", payload)
+    #         payload = decode_email_token(token)
+    #         print("Decoded token payload:", payload)
 
-            if payload["type"] != "verify":
-                raise Exception()
+    #         if payload["type"] != "verify":
+    #             raise Exception()
 
-            email = payload["sub"]
+    #         email = payload["sub"]
 
-        except:
-            raise HTTPException(400, "Invalid or expired token")
+    #     except:
+    #         raise HTTPException(400, "Invalid or expired token")
 
-        user = self.repo.activate_account(db, email)
+    #     user = self.repo.activate_account(db, email)
 
-        if not user:
-            raise HTTPException(404, "User not found")
+    #     if not user:
+    #         raise HTTPException(404, "User not found")
 
-        return user
+    #     return user
     # ----------------------------
     # LOGIN
     # ----------------------------
     def login(self, db: Session, user_data: UserLogin):
 
-        user = self.repo.get_by_email(db, user_data.email)
+        user = self.repo.get_by_username(db, user_data.username)
         if not user or not verify_password(user_data.password, user.hashed_password):
             raise ValueError("Invalid email or password")
         if not user.is_active:
             raise ValueError("Account not activated. Please check your email.")
 
         access_token = create_access_token(
-            data={"sub": user.email},
+            data={"sub": user.username},
             expires_delta=timedelta(minutes=30),
         )
 
         refresh_token = create_refresh_token(
-            data={"sub": user.email},
+            data={"sub": user.username},
         )
 
         return {
@@ -119,32 +118,32 @@ class UserService:
     # Forget Password
     # ----------------------------
 
-    def forget_password(self, email: str, db: Session):
-        user = self.repo.get_by_email(db, email)
-        if not user:
-            return {"message": "If an account exists for this email, you will receive reset instructions."}
+    # def forget_password(self, username: str, db: Session):
+    #     user = self.repo.get_by_username(db, username)
+    #     if not user:
+    #         return {"message": "If an account exists for this email, you will receive reset instructions."}
 
-        token = create_password_reset_token(email=user.email)
-        try:
-            send_reset_password_mail(user.email, token)
-        except:
-            raise ValueError("Failed to send reset password email. Please try again later.")
+    #     token = create_password_reset_token(email=user.email)
+    #     try:
+    #         send_reset_password_mail(user.email, token)
+    #     except:
+    #         raise ValueError("Failed to send reset password email. Please try again later.")
 
-        return {"message": "If an account exists for this email, you will receive reset instructions."}
+    #     return {"message": "If an account exists for this email, you will receive reset instructions."}
 
-    def reset_password(self, token: str, db: Session, new_password: str):
-        try:
-            payload = decode_password_reset_token(token)
-        except ValueError as e:
-            raise ValueError(str(e))
+    # def reset_password(self, token: str, db: Session, new_password: str):
+    #     try:
+    #         payload = decode_password_reset_token(token)
+    #     except ValueError as e:
+    #         raise ValueError(str(e))
 
-        email = payload.get("sub")
-        user = self.repo.get_by_email(db, email)
-        if not user:
-            raise ValueError("User not found")
+    #     email = payload.get("sub")
+    #     user = self.repo.get_by_email(db, email)
+    #     if not user:
+    #         raise ValueError("User not found")
 
-        self.repo.update_password(db, user, hash_password(new_password))
-        return {"message": "Password updated"}
+    #     self.repo.update_password(db, user, hash_password(new_password))
+    #     return {"message": "Password updated"}
 
 
 
@@ -161,12 +160,12 @@ class UserService:
         if payload.get("type") != "refresh":
             raise ValueError("Invalid token type")
 
-        email = payload.get("sub")
-        if not email:
+        username = payload.get("sub")
+        if not username:
             raise ValueError("Invalid token payload")
 
         new_access_token = create_access_token(
-            data={"sub": email},
+            data={"sub": username},
             expires_delta=timedelta(minutes=30),
         )
 

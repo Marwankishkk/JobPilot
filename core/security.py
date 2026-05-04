@@ -72,48 +72,48 @@ def decode_refresh_token(token: str):
         raise ValueError("Invalid token type")
     return payload
     
-def create_email_token(email: str):
-    secret_key = os.getenv("SECRET_KEY")
-    algorithm = os.getenv("ALGORITHM", "HS256")
+# def create_email_token(email: str):
+#     secret_key = os.getenv("SECRET_KEY")
+#     algorithm = os.getenv("ALGORITHM", "HS256")
 
-    now = datetime.now(timezone.utc)
-    expire = now + timedelta(hours=24)
-    print(type(email), email)
-    payload = {
-        "sub": email,   # MUST be string
-        "type": "verify",
-        "iat": now,
-        "exp": expire
-    }
+#     now = datetime.now(timezone.utc)
+#     expire = now + timedelta(hours=24)
+#     print(type(email), email)
+#     payload = {
+#         "sub": email,   # MUST be string
+#         "type": "verify",
+#         "iat": now,
+#         "exp": expire
+#     }
 
-    return jwt.encode(payload, secret_key, algorithm=algorithm)
+#     return jwt.encode(payload, secret_key, algorithm=algorithm)
 
-def decode_email_token(token: str):
-    secret_key = os.getenv("SECRET_KEY")
-    algorithm = os.getenv("ALGORITHM", "HS256")
+# def decode_email_token(token: str):
+#     secret_key = os.getenv("SECRET_KEY")
+#     algorithm = os.getenv("ALGORITHM", "HS256")
 
-    if not secret_key:
-        raise ValueError("SECRET_KEY is missing")
+#     if not secret_key:
+#         raise ValueError("SECRET_KEY is missing")
 
-    try:
-        payload = jwt.decode(token, secret_key, algorithms=[algorithm])
-        print("Decoded email token payload:", payload)
-        if payload.get("type") != "verify":
-            raise ValueError("Invalid email verification token")
+#     try:
+#         payload = jwt.decode(token, secret_key, algorithms=[algorithm])
+#         print("Decoded email token payload:", payload)
+#         if payload.get("type") != "verify":
+#             raise ValueError("Invalid email verification token")
 
-        if not isinstance(payload.get("sub"), str):
-            raise ValueError("Invalid subject in token")
+#         if not isinstance(payload.get("sub"), str):
+#             raise ValueError("Invalid subject in token")
 
-        return payload
+#         return payload
 
-    except jwt.ExpiredSignatureError:
-        raise ValueError("Verification link expired")
+#     except jwt.ExpiredSignatureError:
+#         raise ValueError("Verification link expired")
 
-    except jwt.InvalidTokenError:
-        raise ValueError("Invalid verification token")
+#     except jwt.InvalidTokenError:
+#         raise ValueError("Invalid verification token")
 
 
-def create_password_reset_token(email: str):
+def create_password_reset_token(username: str):
     secret_key = os.getenv("SECRET_KEY")
     algorithm = os.getenv("ALGORITHM", "HS256")
 
@@ -123,7 +123,7 @@ def create_password_reset_token(email: str):
     now = datetime.now(timezone.utc)
     expire = now + timedelta(hours=1)
     payload = {
-        "sub": email,
+        "sub": username,
         "type": "password_reset",
         "iat": now,
         "exp": expire,
