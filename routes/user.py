@@ -93,7 +93,7 @@ def get_current_username(request: Request):
 @router.post("/forgot-password")
 def forgot_password(body: ForgotPasswordRequest, db: Session = Depends(get_db)):
     try:
-        return service.forget_password(body.username, db)
+        return service.forget_password(body.username, db, body.new_password)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
