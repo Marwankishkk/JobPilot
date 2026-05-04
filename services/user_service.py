@@ -65,7 +65,7 @@ class UserService:
         #         status_code=500,
         #         detail="User registered but failed to send verification email. Please try again later."
         #     )
-        return {"message": "User registered successfully. Please check your email to verify your account."}
+        return {"message": "User registered successfully. "}
     # ----------------------------
     # ACTIVATE ACCOUNT
     # ----------------------------
@@ -118,18 +118,18 @@ class UserService:
     # Forget Password
     # ----------------------------
 
-    # def forget_password(self, username: str, db: Session):
-    #     user = self.repo.get_by_username(db, username)
-    #     if not user:
-    #         return {"message": "If an account exists for this email, you will receive reset instructions."}
+    def forget_password(self, username: str, db: Session , new_password: str):
+        user = self.repo.get_by_username(db, username)
+        if not user:
+            return {"message": "If an account exists for this email, you will receive reset instructions."}
 
-    #     token = create_password_reset_token(email=user.email)
-    #     try:
-    #         send_reset_password_mail(user.email, token)
-    #     except:
-    #         raise ValueError("Failed to send reset password email. Please try again later.")
+        try:
+            hashed_password = hash_password(new_password)
+            self.repo.update_password(db, user, hashed_password)
+        except:
+            raise ValueError("Failed to reset password . Please try again later.")
 
-    #     return {"message": "If an account exists for this email, you will receive reset instructions."}
+        return {"message": "password reset."}
 
     # def reset_password(self, token: str, db: Session, new_password: str):
     #     try:
